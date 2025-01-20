@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { MangaDexService } from 'src/services/mangadex/mangadex.service';
 import * as qs from 'qs';
@@ -41,6 +41,19 @@ export class AuthService {
       return responseData;
     } catch (error) {
       console.log(error);
+      if (error.response.status === HttpStatus.UNAUTHORIZED) {
+        const err = error as any;
+        const errMsg = err.response.data.error_description;
+        throw new HttpException(
+          errMsg || 'Failed to login',
+          HttpStatus.UNAUTHORIZED,
+        );
+      } else {
+        throw new HttpException(
+          'Internal server error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
@@ -50,6 +63,19 @@ export class AuthService {
       return res;
     } catch (err) {
       console.log(err);
+      if (err.response.status === HttpStatus.UNAUTHORIZED) {
+        const error = err as any;
+        const errMsg = error.response.data.error_description;
+        throw new HttpException(
+          errMsg || 'Failed to check authen',
+          HttpStatus.UNAUTHORIZED,
+        );
+      } else {
+        throw new HttpException(
+          'Internal server error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
